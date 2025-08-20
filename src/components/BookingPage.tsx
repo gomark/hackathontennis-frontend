@@ -4,11 +4,13 @@ import { authService } from '@/shared/services/authService'
 import { signOut } from 'firebase/auth'
 import { format, addDays } from 'date-fns'
 import { Calendar, Clock, MapPin, User, LogOut } from 'lucide-react'
+import { DatePicker } from '@/components/ui/date-picker'
 import { apiService, Court, TimeSlot, Booking } from '@/services/apiService'
 import { ChatBot } from '@/components/ChatBot'
 
 export function BookingPage() {
   const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'))
+  const [selectedBaseDate, setSelectedBaseDate] = useState<Date>(new Date())
   const [selectedCourt, setSelectedCourt] = useState<string>('')
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([])
   const [courts, setCourts] = useState<Court[]>([])
@@ -132,10 +134,15 @@ export function BookingPage() {
     }
   }
 
+  const handleBaseDateChange = (date: Date) => {
+    setSelectedBaseDate(date)
+    setSelectedDate(format(date, 'yyyy-MM-dd'))
+  }
+
   const getDateOptions = () => {
     const dates = []
     for (let i = 0; i < 7; i++) {
-      const date = addDays(new Date(), i)
+      const date = addDays(selectedBaseDate, i)
       dates.push({
         value: format(date, 'yyyy-MM-dd'),
         label: format(date, 'EEE, MMM d')
@@ -179,9 +186,22 @@ export function BookingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-2xl shadow-lg p-6">
-              <div className="flex items-center space-x-2 mb-4">
-                <Calendar className="h-5 w-5 text-green-600" />
-                <h2 className="text-lg font-semibold text-gray-900">Select Date</h2>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-5 w-5 text-green-600" />
+                  <h2 className="text-lg font-semibold text-gray-900">Select Date</h2>
+                </div>
+                <div className="w-full sm:w-64">
+                  <DatePicker
+                    value={selectedBaseDate}
+                    onChange={handleBaseDateChange}
+                    placeholder="Pick a starting date"
+                  />
+                </div>
+              </div>
+              
+              <div className="mb-3 text-sm text-gray-600">
+                Showing 7 days starting from {format(selectedBaseDate, 'EEEE, MMMM d, yyyy')}
               </div>
               
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
