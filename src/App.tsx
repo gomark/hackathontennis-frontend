@@ -1,25 +1,25 @@
-import { Button } from "@/components/ui/button"
 import { useState } from "react"
+import { LoginPage } from "@/components/LoginPage"
+import { BookingPage } from "@/components/BookingPage"
+import { AuthState } from "@/shared/services/authService"
  
 function App() {
-  const [response, setResponse] = useState<string>("")
-  
-  const handleClick = async () => {
-    try {
-      const res = await fetch('/first/hello')
-      const text = await res.text()
-      setResponse(text)
-    } catch (error) {
-      setResponse(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    }
+  const [authState, setAuthState] = useState<AuthState>({
+    isLoggedIn: false,
+    user: null,
+    auth: null,
+    isInitialized: false
+  })
+
+  const handleAuthStateChange = (newAuthState: AuthState) => {
+    setAuthState(newAuthState)
   }
 
-  return (
-    <div className="flex min-h-svh flex-col items-center justify-center">
-      <Button onClick={handleClick}>Click me</Button>
-      {response && <p className="mt-4">{response}</p>}
-    </div>
-  )
+  if (!authState.isInitialized || !authState.isLoggedIn) {
+    return <LoginPage onAuthStateChange={handleAuthStateChange} />
+  }
+
+  return <BookingPage />
 }
  
 export default App

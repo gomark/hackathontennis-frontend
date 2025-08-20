@@ -1,0 +1,338 @@
+import { useState, useEffect, useCallback } from 'react'
+import { Button } from '@/components/ui/button'
+import { authService } from '@/shared/services/authService'
+import { signOut } from 'firebase/auth'
+import { format, addDays } from 'date-fns'
+import { Calendar, Clock, MapPin, User, LogOut } from 'lucide-react'
+import { apiService, Court, TimeSlot, Booking } from '@/services/apiService'
+import { ChatBot } from '@/components/ChatBot'
+
+export function BookingPage() {
+  const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'))
+  const [selectedCourt, setSelectedCourt] = useState<string>('')
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([])
+  const [courts, setCourts] = useState<Court[]>([])
+  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([])
+  const [showChatbot, setShowChatbot] = useState(false)
+  const [user] = useState(authService.getCurrentUser())
+  const [isLoading, setIsLoading] = useState(false)
+
+  const loadCourts = async () => {
+    try {
+      const response = await apiService.getCourts()
+      setCourts(response.courts)
+    } catch (error) {
+      console.error('Failed to load courts:', error)
+    }
+  }
+
+  const loadTimeSlots = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const response = await apiService.getTimeSlots(selectedCourt, selectedDate)
+      setTimeSlots(response.timeSlots)
+      setSelectedTimeSlots([])
+    } catch (error) {
+      console.error('Failed to load time slots:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [selectedCourt, selectedDate])
+
+  useEffect(() => {
+    loadCourts()
+  }, [])
+
+  useEffect(() => {
+    if (selectedCourt && selectedDate) {
+      loadTimeSlots()
+    }
+  }, [selectedCourt, selectedDate, loadTimeSlots])
+
+  useEffect(() => {
+    if (courts.length > 0 && !selectedCourt) {
+      setSelectedCourt(courts[0].id)
+    }
+  }, [courts, selectedCourt])
+
+  const handleSignOut = async () => {
+    try {
+      const auth = authService.getAuth()
+      if (auth) {
+        await signOut(auth)
+      }
+    } catch (error) {
+      console.error('Sign out error:', error)
+    }
+  }
+
+  const handleTimeSlotToggle = (timeSlotId: string, status: string) => {
+    if (status === 'outside-hours' || status === 'booked-other') {
+      return
+    }
+
+    if (status === 'booked-you') {
+      setSelectedTimeSlots(prev => prev.filter(id => id !== timeSlotId))
+      return
+    }
+
+    if (selectedTimeSlots.includes(timeSlotId)) {
+      setSelectedTimeSlots(prev => prev.filter(id => id !== timeSlotId))
+    } else {
+      setSelectedTimeSlots(prev => [...prev, timeSlotId])
+    }
+  }
+
+  const handleBooking = async () => {
+    if (!selectedCourt || selectedTimeSlots.length === 0) {
+      alert('Please select a court and time slots')
+      return
+    }
+
+    try {
+      setIsLoading(true)
+      const booking: Booking = {
+        courtId: selectedCourt,
+        date: selectedDate,
+        timeSlots: selectedTimeSlots
+      }
+
+      const response = await apiService.createBooking(booking)
+      if (response.success) {
+        alert('Booking successful!')
+        setSelectedTimeSlots([])
+        await loadTimeSlots()
+      } else {
+        alert(response.message || 'Booking failed. Please try again.')
+      }
+    } catch (error) {
+      console.error('Booking error:', error)
+      alert('Booking failed. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const getTimeSlotButtonClass = (status: string, isSelected: boolean) => {
+    const baseClass = "p-3 rounded-lg text-sm font-medium transition-all duration-200 border-2"
+    
+    switch (status) {
+      case 'available':
+        return `${baseClass} ${isSelected 
+          ? 'bg-green-600 text-white border-green-600' 
+          : 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'}`
+      case 'booked-other':
+        return `${baseClass} bg-red-50 text-red-500 border-red-200 cursor-not-allowed opacity-75`
+      case 'booked-you':
+        return `${baseClass} bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100`
+      case 'outside-hours':
+        return `${baseClass} bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed opacity-50`
+      default:
+        return baseClass
+    }
+  }
+
+  const getDateOptions = () => {
+    const dates = []
+    for (let i = 0; i < 7; i++) {
+      const date = addDays(new Date(), i)
+      dates.push({
+        value: format(date, 'yyyy-MM-dd'),
+        label: format(date, 'EEE, MMM d')
+      })
+    }
+    return dates
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-green-600 rounded-full flex items-center justify-center">
+                <span className="text-xl">🎾</span>
+              </div>
+              <h1 className="text-xl font-bold text-gray-900">Google Tennis 2025</h1>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <User className="h-4 w-4" />
+                <span>{user?.displayName || user?.email}</span>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleSignOut}
+                className="flex items-center space-x-2"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Sign Out</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <div className="flex items-center space-x-2 mb-4">
+                <Calendar className="h-5 w-5 text-green-600" />
+                <h2 className="text-lg font-semibold text-gray-900">Select Date</h2>
+              </div>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+                {getDateOptions().map((date) => (
+                  <Button
+                    key={date.value}
+                    variant={selectedDate === date.value ? "default" : "outline"}
+                    className={`p-3 text-sm ${selectedDate === date.value ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                    onClick={() => setSelectedDate(date.value)}
+                  >
+                    {date.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <div className="flex items-center space-x-2 mb-4">
+                <MapPin className="h-5 w-5 text-green-600" />
+                <h2 className="text-lg font-semibold text-gray-900">Select Court</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {courts.map((court) => (
+                  <Button
+                    key={court.id}
+                    variant={selectedCourt === court.id ? "default" : "outline"}
+                    className={`p-4 h-auto flex flex-col items-start ${
+                      selectedCourt === court.id ? 'bg-green-600 hover:bg-green-700' : ''
+                    }`}
+                    onClick={() => setSelectedCourt(court.id)}
+                  >
+                    <span className="font-medium">{court.name}</span>
+                    <span className="text-xs opacity-75">{court.type}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <div className="flex items-center space-x-2 mb-4">
+                <Clock className="h-5 w-5 text-green-600" />
+                <h2 className="text-lg font-semibold text-gray-900">Select Time Slots</h2>
+              </div>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {isLoading ? (
+                  <div className="col-span-full text-center py-8 text-gray-500">
+                    Loading time slots...
+                  </div>
+                ) : (
+                  timeSlots.map((slot) => (
+                    <Button
+                      key={slot.id}
+                      className={getTimeSlotButtonClass(
+                        slot.status, 
+                        selectedTimeSlots.includes(slot.id)
+                      )}
+                      onClick={() => handleTimeSlotToggle(slot.id, slot.status)}
+                      disabled={slot.status === 'outside-hours' || slot.status === 'booked-other'}
+                    >
+                      {slot.time}
+                    </Button>
+                  ))
+                )}
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-4 text-xs">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-green-50 border-2 border-green-200 rounded"></div>
+                  <span>Available</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-red-50 border-2 border-red-200 rounded"></div>
+                  <span>Booked by Others</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-blue-50 border-2 border-blue-200 rounded"></div>
+                  <span>Your Bookings</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-gray-50 border-2 border-gray-200 rounded"></div>
+                  <span>Outside Hours</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Booking Summary</h3>
+              
+              <div className="space-y-3 text-sm">
+                <div>
+                  <span className="text-gray-600">Date:</span>
+                  <span className="ml-2 font-medium">{format(new Date(selectedDate), 'EEE, MMM d, yyyy')}</span>
+                </div>
+                
+                <div>
+                  <span className="text-gray-600">Court:</span>
+                  <span className="ml-2 font-medium">
+                    {courts.find(c => c.id === selectedCourt)?.name || 'None selected'}
+                  </span>
+                </div>
+                
+                <div>
+                  <span className="text-gray-600">Time Slots:</span>
+                  <div className="ml-2 mt-1">
+                    {selectedTimeSlots.length === 0 ? (
+                      <span className="text-gray-400">None selected</span>
+                    ) : (
+                      <div className="space-y-1">
+                        {selectedTimeSlots.map(slotId => {
+                          const slot = timeSlots.find(s => s.id === slotId)
+                          return (
+                            <div key={slotId} className="text-sm font-medium">
+                              {slot?.time}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="pt-2 border-t">
+                  <span className="text-gray-600">Total Hours:</span>
+                  <span className="ml-2 font-medium">{selectedTimeSlots.length}</span>
+                </div>
+              </div>
+              
+              <Button 
+                onClick={handleBooking}
+                disabled={!selectedCourt || selectedTimeSlots.length === 0 || isLoading}
+                className="w-full mt-6 bg-green-600 hover:bg-green-700"
+                size="lg"
+              >
+                {isLoading ? 'Booking...' : 'Book Now'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <div className="fixed bottom-6 right-6">
+        <ChatBot 
+          isOpen={showChatbot} 
+          onToggle={() => setShowChatbot(!showChatbot)} 
+        />
+      </div>
+    </div>
+  )
+}
+
