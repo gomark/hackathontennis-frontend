@@ -1,10 +1,13 @@
 import { authService } from '@/shared/services/authService'
 
 export interface Court {
-  primarykey: Long
-  courtName: string
-  type: string
-  courtDesc: string
+  primaryKey?: number
+  courtName?: string
+  type?: string
+  courtDesc?: string
+  // Legacy support for old API format
+  id?: string
+  name?: string
 }
 
 export interface TimeSlot {
@@ -67,10 +70,10 @@ export class ApiService {
       console.error('Failed to fetch courts:', error)
       return {
         courts: [
-          { id: 'court-1', name: 'Court 1', type: 'Hard Court' },
-          { id: 'court-2', name: 'Court 2', type: 'Clay Court' },
-          { id: 'court-3', name: 'Court 3', type: 'Hard Court' },
-          { id: 'court-4', name: 'Court 4', type: 'Grass Court' }
+          { primaryKey: 1, courtName: 'Court 1', type: 'Hard Court', courtDesc: 'Professional hard court with excellent drainage' },
+          { primaryKey: 2, courtName: 'Court 2', type: 'Clay Court', courtDesc: 'Traditional clay court surface for slower gameplay' },
+          { primaryKey: 3, courtName: 'Court 3', type: 'Hard Court', courtDesc: 'Standard hard court with LED lighting' },
+          { primaryKey: 4, courtName: 'Court 4', type: 'Grass Court', courtDesc: 'Premium grass court for elite play' }
         ]
       }
     }

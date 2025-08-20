@@ -27,7 +27,7 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
   const loadCourts = async () => {
     try {
       const response = await apiService.getCourts()
-      
+      console.log('Courts response:', response.courts)
       setCourts(response.courts)
     } catch (error) {
       console.error('Failed to load courts:', error)
@@ -59,7 +59,9 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
 
   useEffect(() => {
     if (courts.length > 0 && !selectedCourt) {
-      setSelectedCourt(courts[0].id)
+      const firstCourt = courts[0]
+      const courtId = firstCourt.primaryKey?.toString() || firstCourt.id || 'court-1'
+      setSelectedCourt(courtId)
     }
   }, [courts, selectedCourt])
 
@@ -246,19 +248,26 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {courts.map((court) => (
-                  <Button
-                    key={court.id}
-                    variant={selectedCourt === court.id ? "default" : "outline"}
-                    className={`p-4 h-auto flex flex-col items-start ${
-                      selectedCourt === court.id ? 'bg-green-600 hover:bg-green-700' : ''
-                    }`}
-                    onClick={() => setSelectedCourt(court.id)}
-                  >
-                    <span className="font-medium">{court.name}</span>
-                    <span className="text-xs opacity-75">{court.type}</span>
-                  </Button>
-                ))}
+                {courts.map((court, index) => {
+                  // Handle both new and legacy API formats
+                  const courtId = court.primaryKey?.toString() || court.id || `court-${index + 1}`
+                  const courtName = court.courtName || court.name || `Court ${index + 1}`
+                  const courtType = court.courtDesc || 'Standard Court'
+                  
+                  return (
+                    <Button
+                      key={courtId}
+                      variant={selectedCourt === courtId ? "default" : "outline"}
+                      className={`p-4 h-auto flex flex-col items-start ${
+                        selectedCourt === courtId ? 'bg-green-600 hover:bg-green-700 text-white' : ''
+                      }`}
+                      onClick={() => setSelectedCourt(courtId)}
+                    >
+                      <span className="font-medium">{courtName}</span>
+                      <span className="text-xs opacity-75">{courtType}</span>
+                    </Button>
+                  )
+                })}
               </div>
             </div>
 
@@ -324,7 +333,13 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
                 <div>
                   <span className="text-gray-600">Court:</span>
                   <span className="ml-2 font-medium">
-                    {courts.find(c => c.id === selectedCourt)?.name || 'None selected'}
+                    {(() => {
+                      const selectedCourtData = courts.find((c, index) => {
+                        const courtId = c.primarykey?.toString() || c.id || `court-${index + 1}`
+                        return courtId === selectedCourt
+                      })
+                      return selectedCourtData?.courtName || selectedCourtData?.name || 'None selected'
+                    })()}
                   </span>
                 </div>
                 
