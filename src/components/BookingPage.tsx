@@ -7,8 +7,13 @@ import { Calendar, Clock, MapPin, User, LogOut } from 'lucide-react'
 import { DatePicker } from '@/components/ui/date-picker'
 import { apiService, Court, TimeSlot, Booking } from '@/services/apiService'
 import { ChatBot } from '@/components/ChatBot'
+import { AuthState } from '@/shared/services/authService'
 
-export function BookingPage() {
+interface BookingPageProps {
+  onAuthStateChange: (authState: AuthState) => void
+}
+
+export function BookingPage({ onAuthStateChange }: BookingPageProps) {
   const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'))
   const [selectedBaseDate, setSelectedBaseDate] = useState<Date>(new Date())
   const [selectedCourt, setSelectedCourt] = useState<string>('')
@@ -22,6 +27,7 @@ export function BookingPage() {
   const loadCourts = async () => {
     try {
       const response = await apiService.getCourts()
+      
       setCourts(response.courts)
     } catch (error) {
       console.error('Failed to load courts:', error)
@@ -57,11 +63,26 @@ export function BookingPage() {
     }
   }, [courts, selectedCourt])
 
+  useEffect(() => {
+    const unsubscribe = authService.onAuthStateChange((authState) => {
+      onAuthStateChange(authState)
+    })
+
+    return unsubscribe
+  }, [onAuthStateChange])
+
   const handleSignOut = async () => {
     try {
       const auth = authService.getAuth()
       if (auth) {
         await signOut(auth)
+        // Update the auth state to redirect to login page
+        onAuthStateChange({
+          isLoggedIn: false,
+          user: null,
+          auth: null,
+          isInitialized: true
+        })
       }
     } catch (error) {
       console.error('Sign out error:', error)

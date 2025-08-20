@@ -1,10 +1,10 @@
 import { authService } from '@/shared/services/authService'
 
 export interface Court {
-  id: string
-  name: string
+  primarykey: Long
+  courtName: string
   type: string
-  description?: string
+  courtDesc: string
 }
 
 export interface TimeSlot {
@@ -60,6 +60,8 @@ export class ApiService {
         `${this.baseUrl}/courts`,
         'GET'
       )
+      console.log(response);
+
       return JSON.parse(response)
     } catch (error) {
       console.error('Failed to fetch courts:', error)

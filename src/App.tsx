@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { LoginPage } from "@/components/LoginPage"
 import { BookingPage } from "@/components/BookingPage"
 import { AuthState } from "@/shared/services/authService"
@@ -11,15 +11,15 @@ function App() {
     isInitialized: false
   })
 
-  const handleAuthStateChange = (newAuthState: AuthState) => {
+  const handleAuthStateChange = useCallback((newAuthState: AuthState) => {
     setAuthState(newAuthState)
-  }
+  }, [])
 
   if (!authState.isInitialized || !authState.isLoggedIn) {
     return <LoginPage onAuthStateChange={handleAuthStateChange} />
   }
 
-  return <BookingPage />
+  return <BookingPage onAuthStateChange={handleAuthStateChange} />
 }
  
 export default App
