@@ -335,7 +335,7 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
                   <span className="ml-2 font-medium">
                     {(() => {
                       const selectedCourtData = courts.find((c, index) => {
-                        const courtId = c.primarykey?.toString() || c.id || `court-${index + 1}`
+                        const courtId = c.primaryKey?.toString() || c.id || `court-${index + 1}`
                         return courtId === selectedCourt
                       })
                       return selectedCourtData?.courtName || selectedCourtData?.name || 'None selected'

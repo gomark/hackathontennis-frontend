@@ -82,17 +82,21 @@ export class ApiService {
   async getTimeSlots(courtId: string, date: string): Promise<TimeSlotsResponse> {
     try {
       const response = await authService.callAPIWithAccessToken(
-        `${this.baseUrl}/courts/${courtId}/timeslots?date=${date}`,
+        //`${this.baseUrl}/courts/${courtId}/timeslots?date=${date}`,
+        `${this.baseUrl}/timeslots?court=${courtId}&date=${date}`,
         'GET'
       )
+
+      console.log(response);
+
       return JSON.parse(response)
     } catch (error) {
       console.error('Failed to fetch time slots:', error)
       return {
         timeSlots: [
-          { id: '06:00', time: '06:00 AM', status: 'outside-hours' },
-          { id: '07:00', time: '07:00 AM', status: 'outside-hours' },
-          { id: '08:00', time: '08:00 AM', status: 'available' },
+          { id: '6', time: '06:00 AM', status: 'outside-hours' },
+          { id: '7', time: '07:00 AM', status: 'outside-hours' },
+          { id: '8', time: '08:00 AM', status: 'available' },
           { id: '09:00', time: '09:00 AM', status: 'booked-other' },
           { id: '10:00', time: '10:00 AM', status: 'available' },
           { id: '11:00', time: '11:00 AM', status: 'available' },
@@ -105,7 +109,7 @@ export class ApiService {
           { id: '18:00', time: '06:00 PM', status: 'available' },
           { id: '19:00', time: '07:00 PM', status: 'available' },
           { id: '20:00', time: '08:00 PM', status: 'outside-hours' },
-          { id: '21:00', time: '09:00 PM', status: 'outside-hours' }
+          { id: '21:00', time: '09:00 PM', status: 'outside-hours' },
         ]
       }
     }
