@@ -54,5 +54,22 @@ The build command runs TypeScript compilation first (`tsc -b`) then Vite build, 
 ### Hot Module Replacement
 Vite provides fast HMR during development. Edit TypeScript/TSX files in `src/` to see immediate updates.
 
+### API Configuration
+The project is configured to handle different API endpoints for development and production:
+
+**Development**: 
+- Vite dev server proxies `/api/*` requests to `http://localhost:8080/api/*`
+- Use relative API calls like `fetch('/api/endpoint')` in your code
+- Backend server should run on `localhost:8080`
+
+**Production**:
+- API calls to `/api/*` go directly to the same domain
+- No proxy configuration needed in production build
+
+**Environment Variables**:
+- `.env.development` - Development-specific configuration
+- `.env.production` - Production-specific configuration
+- Access via `import.meta.env.VITE_API_BASE_URL` in code
+
 ### Code Quality
 ESLint is configured to enforce TypeScript and React best practices. Run `npm run lint` before committing changes.
