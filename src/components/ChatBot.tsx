@@ -92,6 +92,10 @@ export function ChatBot({ isOpen, onToggle }: ChatBotProps) {
     setIsLoading(false)
     setInputText('')
 
+    const deleteSessionResponse = await apiService.deleteAgentSession();
+    console.log("deleteSession result:");
+    console.log(deleteSessionResponse);
+
     const response = await apiService.checkAgentSession();
     console.log("checkAgentSession result:");
     console.log(response);

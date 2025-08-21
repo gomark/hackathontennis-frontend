@@ -247,6 +247,27 @@ export class ApiService {
 
   }
 
+  async deleteAgentSession(): Promise<{result:boolean}> {
+    try {
+      const url = `${this.baseUrl}/deleteAgentSession`;
+      // fetch using GET and if get HTTP 200, 404 not found and else mean error
+      const response = await authService.callAPIWithAccessToken(
+        url, 
+        'GET'
+      );
+
+      const status = JSON.parse(response).status;
+      if (status == "OK") {
+        return({result:true});
+      } else {
+        return({result:false});
+      }
+
+    } catch (error) {
+      return({result:false});
+    }
+  }
+
   async createAgentSession(payload: any): Promise<{ found: boolean }> {
     try {
       const url = `${this.baseUrl}/createAgentSession`;

@@ -249,6 +249,23 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
     return dates
   }
 
+  const onToggleEvent = async () => {
+    setShowChatbot(!showChatbot)
+
+    if (showChatbot == true) {
+      // going to show chatbot
+      const checkSessionResponse = await apiService.checkAgentSession();
+      if (checkSessionResponse.found == false) {
+        console.log("creating agent session");
+        const payload = {          
+          username: user?.displayName          
+        }
+        const createResponse = await apiService.createAgentSession(payload);
+        console.log(createResponse);
+      }
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
       <header className="bg-white shadow-sm border-b">
@@ -460,7 +477,7 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
       <div className="fixed bottom-6 right-6">
         <ChatBot 
           isOpen={showChatbot} 
-          onToggle={() => setShowChatbot(!showChatbot)} 
+          onToggle={onToggleEvent} 
         />
       </div>
     </div>
