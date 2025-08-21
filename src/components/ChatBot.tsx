@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { MessageCircle, Send, X, RotateCcw } from 'lucide-react'
+import { User } from 'firebase/auth'
 import { apiService } from '@/services/apiService'
 
 interface Message {
@@ -13,9 +14,10 @@ interface Message {
 interface ChatBotProps {
   isOpen: boolean
   onToggle: () => void
+  user: User | null
 }
 
-export function ChatBot({ isOpen, onToggle }: ChatBotProps) {
+export function ChatBot({ isOpen, onToggle, user }: ChatBotProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -96,9 +98,11 @@ export function ChatBot({ isOpen, onToggle }: ChatBotProps) {
     console.log("deleteSession result:");
     console.log(deleteSessionResponse);
 
-    const response = await apiService.checkAgentSession();
-    console.log("checkAgentSession result:");
-    console.log(response);
+    const payload = {          
+      username: user?.displayName          
+    }
+    const createResponse = await apiService.createAgentSession(payload);
+    console.log(createResponse);      
   }
 
   const formatTime = (date: Date) => {

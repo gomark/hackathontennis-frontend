@@ -221,7 +221,7 @@ export class ApiService {
     } catch (error) {
       console.error('Failed to send chat message:', error)
       return {
-        response: "I'm sorry, I'm having trouble connecting right now. Please try again later or contact support for assistance with your tennis court booking."
+        response: "I'm sorry, I'm having trouble connecting right now. Please try again later. If the problem still persists, click refresh session button."
       }
     }
   }

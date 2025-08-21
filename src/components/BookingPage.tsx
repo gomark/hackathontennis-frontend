@@ -63,47 +63,6 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
 
   }, [])
 
-  /*
-  useEffect(() => {
-    (async () => {
-      const response: any = await getEnvs("/first/getEnvs?keys=", "HKT_AGENT_URL");
-      console.log("HKT_AGENT_URL=" + response.HKT_AGENT_URL);
-      apiService.setAgentUrl(response.HKT_AGENT_URL);
-    })();
-
-    (async () => {
-      const response = await apiService.getUserId();
-      setAgentUserId(response.userId ?? 0);
-      console.log("userId=" + response.userId);
-    })();
-
-  }, [])
-  */
-
-  /*
-  useEffect(() => {
-    (async () => {
-      console.log("checking existing agent session");
-      
-      const response = await apiService.checkAgentSession();
-      console.log("agent session found=" + response.found);
-
-      if (response.found == false) {
-        console.log("creating agent session");
-        const payload = {          
-          username: user?.displayName          
-        }
-        const createResponse = await apiService.createAgentSession(payload);
-        console.log(createResponse);
-        
-      }
-
-      console.log(user?.displayName);
-    })();
-  }, []);
-  */
-
-
   useEffect(() => {
     if (selectedCourt && selectedDate) {
       loadTimeSlots()
@@ -141,10 +100,15 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
     try {
       const auth = authService.getAuth()
       if (auth) {
+        await apiService.deleteAgentSession();
+        
         await signOut(auth)
         toast.success('Signed out successfully', {
           description: 'You have been logged out. See you next time!'
         })
+
+        
+
         // Update the auth state to redirect to login page
         onAuthStateChange({
           isLoggedIn: false,
@@ -250,20 +214,20 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
   }
 
   const onToggleEvent = async () => {
+    console.log("showChatbot=" + showChatbot);
     setShowChatbot(!showChatbot)
 
-    if (showChatbot == true) {
-      // going to show chatbot
-      const checkSessionResponse = await apiService.checkAgentSession();
-      if (checkSessionResponse.found == false) {
-        console.log("creating agent session");
-        const payload = {          
-          username: user?.displayName          
-        }
-        const createResponse = await apiService.createAgentSession(payload);
-        console.log(createResponse);
+    // going to show chatbot
+    const checkSessionResponse = await apiService.checkAgentSession();
+    if (checkSessionResponse.found == false) {
+      console.log("creating agent session");
+      const payload = {          
+        username: user?.displayName          
       }
+      const createResponse = await apiService.createAgentSession(payload);
+      console.log(createResponse);
     }
+        
   }
 
   return (
@@ -478,6 +442,7 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
         <ChatBot 
           isOpen={showChatbot} 
           onToggle={onToggleEvent} 
+          user={user}
         />
       </div>
     </div>
