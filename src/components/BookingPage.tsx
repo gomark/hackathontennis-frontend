@@ -257,7 +257,7 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
               <div className="h-10 w-10 bg-green-600 rounded-full flex items-center justify-center">
                 <span className="text-xl">🎾</span>
               </div>
-              <h1 className="text-xl font-bold text-gray-900">Google Tennis 2025</h1>
+              <h1 className="text-xl font-bold text-gray-900">Ace book</h1>
             </div>
             
             <div className="flex items-center space-x-4">

@@ -3,6 +3,7 @@ import { LoginPage } from "@/components/LoginPage"
 import { BookingPage } from "@/components/BookingPage"
 import { AuthState } from "@/shared/services/authService"
 import { Toaster } from "sonner"
+import { useEffect } from 'react'
  
 function App() {
   const [authState, setAuthState] = useState<AuthState>({
@@ -10,11 +11,15 @@ function App() {
     user: null,
     auth: null,
     isInitialized: false
-  })
+  })  
 
   const handleAuthStateChange = useCallback((newAuthState: AuthState) => {
     setAuthState(newAuthState)
   }, [])
+
+  useEffect(() => {
+    document.title = "Ace book"
+  }, [])  
 
   return (
     <>

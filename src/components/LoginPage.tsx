@@ -85,7 +85,7 @@ export function LoginPage({ onAuthStateChange }: LoginPageProps) {
             <div className="h-16 w-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl">🎾</span>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Google Tennis 2025</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Ace book</h1>
             <p className="text-gray-600 mt-2">Book your tennis court with ease</p>
           </div>
           
