@@ -135,6 +135,7 @@ export class AuthService {
     }
   }
 
+
   onAuthStateChange(callback: (state: AuthState) => void): () => void {
     this.listeners.push(callback);
     

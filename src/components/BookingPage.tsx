@@ -8,6 +8,8 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { apiService, Court, TimeSlot, Booking } from '@/services/apiService'
 import { ChatBot } from '@/components/ChatBot'
 import { AuthState } from '@/shared/services/authService'
+import { toast } from 'sonner'
+import { getEnvs } from '@/shared/services/utils'
 
 interface BookingPageProps {
   onAuthStateChange: (authState: AuthState) => void
@@ -24,6 +26,9 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
   const [user] = useState(authService.getCurrentUser())
   const [isLoading, setIsLoading] = useState(false)
 
+  const [agentUserId, setAgentUserId] = useState(0);
+  const [agentSession, setAgentSession] = useState<string>('');
+
   const loadCourts = async () => {
     try {
       const response = await apiService.getCourts()
@@ -31,6 +36,9 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
       setCourts(response.courts)
     } catch (error) {
       console.error('Failed to load courts:', error)
+      toast.error('Failed to load courts', {
+        description: 'Please refresh the page or try again later.'
+      })
     }
   }
 
@@ -42,6 +50,9 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
       setSelectedTimeSlots([])
     } catch (error) {
       console.error('Failed to load time slots:', error)
+      toast.error('Failed to load time slots', {
+        description: 'Unable to fetch available time slots. Please try again.'
+      })
     } finally {
       setIsLoading(false)
     }
@@ -49,7 +60,50 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
 
   useEffect(() => {
     loadCourts()
+
   }, [])
+
+  /*
+  useEffect(() => {
+    (async () => {
+      const response: any = await getEnvs("/first/getEnvs?keys=", "HKT_AGENT_URL");
+      console.log("HKT_AGENT_URL=" + response.HKT_AGENT_URL);
+      apiService.setAgentUrl(response.HKT_AGENT_URL);
+    })();
+
+    (async () => {
+      const response = await apiService.getUserId();
+      setAgentUserId(response.userId ?? 0);
+      console.log("userId=" + response.userId);
+    })();
+
+  }, [])
+  */
+
+  useEffect(() => {
+    (async () => {
+      console.log("checking existing agent session");
+      
+      const response = await apiService.checkAgentSession();
+      console.log("agent session found=" + response.found);
+
+      if (response.found == false) {
+        console.log("creating agent session");
+        const payload = {
+          state: {
+            username: user?.displayName
+          }
+        }
+        const createResponse = await apiService.createAgentSession(payload);
+        console.log(createResponse);
+        
+      }
+
+      console.log(user?.displayName);
+    })();
+  }, []);
+
+
 
   useEffect(() => {
     if (selectedCourt && selectedDate) {
@@ -65,6 +119,7 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
     }
   }, [courts, selectedCourt])
 
+  
   useEffect(() => {
     const unsubscribe = authService.onAuthStateChange((authState) => {
       onAuthStateChange(authState)
@@ -72,12 +127,25 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
 
     return unsubscribe
   }, [onAuthStateChange])
+  
+
+  useEffect(() => {
+    console.log("my event");
+    if (authService.getAuthState().isLoggedIn == true) {
+      console.log("is login");
+    } else {
+      console.log("is logout");
+    }
+  }, [onAuthStateChange]);
 
   const handleSignOut = async () => {
     try {
       const auth = authService.getAuth()
       if (auth) {
         await signOut(auth)
+        toast.success('Signed out successfully', {
+          description: 'You have been logged out. See you next time!'
+        })
         // Update the auth state to redirect to login page
         onAuthStateChange({
           isLoggedIn: false,
@@ -88,6 +156,9 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
       }
     } catch (error) {
       console.error('Sign out error:', error)
+      toast.error('Failed to sign out', {
+        description: 'Please try again or refresh the page.'
+      })
     }
   }
 
@@ -110,7 +181,7 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
 
   const handleBooking = async () => {
     if (!selectedCourt || selectedTimeSlots.length === 0) {
-      alert('Please select a court and time slots')
+      toast.error('Please select a court and time slots')
       return
     }
 
@@ -124,15 +195,17 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
 
       const response = await apiService.createBooking(booking)
       if (response.success) {
-        alert('Booking successful!')
+        toast.success('Booking successful!', {
+          description: 'Your tennis court has been booked successfully.'
+        })
         setSelectedTimeSlots([])
         await loadTimeSlots()
       } else {
-        alert(response.message || 'Booking failed. Please try again.')
+        toast.error(response.message || 'Booking failed. Please try again.')
       }
     } catch (error) {
       console.error('Booking error:', error)
-      alert('Booking failed. Please try again.')
+      toast.error('Booking failed. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -160,6 +233,9 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
   const handleBaseDateChange = (date: Date) => {
     setSelectedBaseDate(date)
     setSelectedDate(format(date, 'yyyy-MM-dd'))
+    toast.info('Date range updated', {
+      description: `Now showing 7 days starting from ${format(date, 'MMM d, yyyy')}`
+    })
   }
 
   const getDateOptions = () => {

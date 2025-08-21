@@ -1,4 +1,5 @@
 import { authService } from '@/shared/services/authService'
+import { getEnvs } from '@/shared/services/utils'
 
 export interface Court {
   primaryKey?: number
@@ -44,11 +45,30 @@ export interface UserBookingsResponse {
   bookings: Booking[]
 }
 
+export interface IUserIdResponse {
+  userId?: number;
+  status?: string;
+  message?: string;
+}
+
+export interface ICreateSessionResponse {
+  status: string;
+  message: string;
+}
+
 export class ApiService {
   private static instance: ApiService
   private baseUrl = '/api'
 
-  private constructor() {}
+  private agentUrl = '';
+
+  private constructor() {
+
+  }
+
+  public setAgentUrl(url: string) {
+    this.agentUrl = url;
+  }
 
   static getInstance(): ApiService {
     if (!ApiService.instance) {
@@ -116,6 +136,7 @@ export class ApiService {
   }
 
   async createBooking(booking: Booking): Promise<BookingResponse> {
+    
     try {
       const response = await authService.callAPIWithAccessToken(
         `${this.baseUrl}/bookings`,
@@ -204,6 +225,65 @@ export class ApiService {
       }
     }
   }
+
+  /***
+   * Return true mean found the session
+   */
+  async checkAgentSession(): Promise<{ found: boolean }> {
+    try {
+      const url = `${this.baseUrl}/checkAgentSession`;
+      // fetch using GET and if get HTTP 200, 404 not found and else mean error
+      const response = await authService.callAPIWithAccessToken(
+        url, 
+        'GET'
+      );
+
+      //console.log(response);
+
+      return({found:true});
+    } catch (error) {
+      return({found:false});
+    }
+
+  }
+
+  async createAgentSession(payload: any): Promise<{ found: boolean }> {
+    try {
+      const url = `${this.baseUrl}/createAgentSession`;
+      // fetch using GET and if get HTTP 200, 404 not found and else mean error
+      const response = await authService.callAPIWithAccessToken(
+        url, 
+        'POST',
+        payload
+      );
+
+      console.log(response);
+
+      return({found:true});
+    } catch (error) {
+      return({found:false});
+    }
+
+  }  
+
+  async getUserId(): Promise<IUserIdResponse> {
+    try {
+      const response = await authService.callAPIWithAccessToken(
+        `${this.baseUrl}/getUserId`,
+        'GET'
+      );
+
+      return(JSON.parse(response));
+
+    } catch (error) {
+      console.error('Failed to update booking:', error)
+      return {        
+        status: "ERROR",
+        message: 'Failed to getUserId'
+      }
+    }
+  }
+
 }
 
 export const apiService = ApiService.getInstance()
