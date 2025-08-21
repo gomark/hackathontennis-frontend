@@ -89,10 +89,8 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
 
       if (response.found == false) {
         console.log("creating agent session");
-        const payload = {
-          state: {
-            username: user?.displayName
-          }
+        const payload = {          
+          username: user?.displayName          
         }
         const createResponse = await apiService.createAgentSession(payload);
         console.log(createResponse);
