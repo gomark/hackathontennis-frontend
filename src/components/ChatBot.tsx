@@ -99,7 +99,7 @@ export function ChatBot({ isOpen, onToggle }: ChatBotProps) {
   }
 
   return (
-    <div className="w-80 h-96 bg-white rounded-2xl shadow-xl border overflow-hidden flex flex-col">
+    <div className="w-80 h-[65vh] bg-white rounded-2xl shadow-xl border overflow-hidden flex flex-col">
       <div className="bg-green-600 text-white p-4 flex justify-between items-center">
         <div>
           <h3 className="font-semibold">Tennis Assistant Agent</h3>
