@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { MessageCircle, Send, X, RotateCcw } from 'lucide-react'
 import { User } from 'firebase/auth'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { apiService } from '@/services/apiService'
 
 interface Message {
@@ -21,7 +23,7 @@ export function ChatBot({ isOpen, onToggle, user }: ChatBotProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: '🎾 Hello! I\'m your Tennis Assistant. I can help you with court bookings, availability, and tennis-related questions. How can I help you today?',
+      text: '🎾 **Hello!** I\'m your Tennis Assistant.\n\nI can help you with:\n- Court bookings\n- Court availability\n- Tennis-related questions\n\nHow can I help you today?',
       isUser: false,
       timestamp: new Date()
     }
@@ -87,7 +89,7 @@ export function ChatBot({ isOpen, onToggle, user }: ChatBotProps) {
   const handleClearSession = async () => {
     setMessages([{
       id: '1',
-      text: '🎾 Hello! I\'m your Tennis Assistant. I can help you with court bookings, availability, and tennis-related questions. How can I help you today?',
+      text: '🎾 **Hello!** I\'m your Tennis Assistant.\n\nI can help you with:\n- Court bookings\n- Court availability\n- Tennis-related questions\n\nHow can I help you today?',
       isUser: false,
       timestamp: new Date()
     }])
@@ -122,7 +124,7 @@ export function ChatBot({ isOpen, onToggle, user }: ChatBotProps) {
   }
 
   return (
-    <div className="w-80 h-[65vh] bg-white rounded-2xl shadow-xl border overflow-hidden flex flex-col">
+    <div className="w-96 h-[65vh] bg-white rounded-2xl shadow-xl border overflow-hidden flex flex-col">
       <div className="bg-green-600 text-white p-4 flex justify-between items-center">
         <div>
           <h3 className="font-semibold">Tennis Assistant Agent</h3>
@@ -163,7 +165,41 @@ export function ChatBot({ isOpen, onToggle, user }: ChatBotProps) {
                   : 'bg-gray-100 text-gray-900 rounded-bl-sm'
               }`}
             >
-              <p className="whitespace-pre-wrap">{message.text}</p>
+              {message.isUser ? (
+                <p className="whitespace-pre-wrap">{message.text}</p>
+              ) : (
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                    strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                    em: ({ children }) => <em className="italic">{children}</em>,
+                    code: ({ children }) => (
+                      <code className="bg-gray-200 text-gray-800 px-1 py-0.5 rounded text-xs font-mono">
+                        {children}
+                      </code>
+                    ),
+                    pre: ({ children }) => (
+                      <pre className="bg-gray-200 text-gray-800 p-2 rounded text-xs font-mono overflow-x-auto my-2">
+                        {children}
+                      </pre>
+                    ),
+                    ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
+                    li: ({ children }) => <li className="text-sm">{children}</li>,
+                    blockquote: ({ children }) => (
+                      <blockquote className="border-l-2 border-gray-300 pl-2 italic my-2">
+                        {children}
+                      </blockquote>
+                    ),
+                    h1: ({ children }) => <h1 className="text-lg font-bold mb-2">{children}</h1>,
+                    h2: ({ children }) => <h2 className="text-base font-bold mb-1">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-sm font-bold mb-1">{children}</h3>,
+                  }}
+                >
+                  {message.text}
+                </ReactMarkdown>
+              )}
               <p
                 className={`text-xs mt-1 ${
                   message.isUser ? 'text-green-100' : 'text-gray-500'
