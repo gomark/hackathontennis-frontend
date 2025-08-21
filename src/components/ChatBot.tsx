@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { MessageCircle, Send, X } from 'lucide-react'
+import { MessageCircle, Send, X, RotateCcw } from 'lucide-react'
 import { apiService } from '@/services/apiService'
 
 interface Message {
@@ -82,6 +82,21 @@ export function ChatBot({ isOpen, onToggle }: ChatBotProps) {
     }
   }
 
+  const handleClearSession = async () => {
+    setMessages([{
+      id: '1',
+      text: '🎾 Hello! I\'m your Tennis Assistant. I can help you with court bookings, availability, and tennis-related questions. How can I help you today?',
+      isUser: false,
+      timestamp: new Date()
+    }])
+    setIsLoading(false)
+    setInputText('')
+
+    const response = await apiService.checkAgentSession();
+    console.log("checkAgentSession result:");
+    console.log(response);
+  }
+
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   }
@@ -105,14 +120,26 @@ export function ChatBot({ isOpen, onToggle }: ChatBotProps) {
           <h3 className="font-semibold">Tennis Assistant Agent</h3>
           <p className="text-sm opacity-90">Online</p>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onToggle}
-          className="text-white hover:bg-green-700 h-8 w-8 p-0"
-        >
-          <X className="h-4 w-4" />
-        </Button>
+        <div className="flex space-x-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClearSession}
+            className="text-white hover:bg-green-700 h-8 w-8 p-0"
+            title="Clear conversation"
+          >
+            <RotateCcw className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggle}
+            className="text-white hover:bg-green-700 h-8 w-8 p-0"
+            title="Close chat"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -161,7 +188,7 @@ export function ChatBot({ isOpen, onToggle }: ChatBotProps) {
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress}
             placeholder="Type your message..."
             className="flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
             disabled={isLoading}

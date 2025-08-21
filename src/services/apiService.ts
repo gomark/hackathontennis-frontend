@@ -240,7 +240,7 @@ export class ApiService {
 
       //console.log(response);
 
-      return({found:true});
+      return({found: JSON.parse(response).found});
     } catch (error) {
       return({found:false});
     }

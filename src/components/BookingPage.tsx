@@ -80,6 +80,7 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
   }, [])
   */
 
+  /*
   useEffect(() => {
     (async () => {
       console.log("checking existing agent session");
@@ -100,7 +101,7 @@ export function BookingPage({ onAuthStateChange }: BookingPageProps) {
       console.log(user?.displayName);
     })();
   }, []);
-
+  */
 
 
   useEffect(() => {
