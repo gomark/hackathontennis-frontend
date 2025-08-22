@@ -132,7 +132,10 @@ export function LoginPage({ onAuthStateChange }: LoginPageProps) {
           </Button>
 
           <p className="mt-6 text-xs text-gray-500 text-center">
-            Hackathon 2025 Project
+            Hello AI SG/SEA 2025 Hackathon!<br /><br />
+            puttitang@google.com<br />
+            wittawin@google.com<br />
+            wattw@google.com
           </p>
         </div>
       </div>

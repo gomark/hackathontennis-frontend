@@ -1,69 +1,90 @@
-# React + TypeScript + Vite
+# Tennis Booking App - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React TypeScript frontend application for tennis court booking, built as part of a hackathon project. The application provides user authentication, court booking functionality, and an integrated chatbot for assistance.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🎾 Tennis court booking system
+- 🔐 User authentication and login
+- 🤖 Integrated chatbot for user assistance
+- 📅 Date picker for booking selection
+- 🎨 Modern UI with Tailwind CSS
+- 🔥 Firebase integration for backend services
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Frontend**: React 19 + TypeScript
+- **Build Tool**: Vite 7
+- **Styling**: Tailwind CSS 4
+- **UI Components**: Radix UI, Lucide React
+- **Backend**: Firebase/Firestore
+- **Routing**: React Router DOM
+- **Date Handling**: date-fns
+- **Notifications**: Sonner
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Getting Started
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### Prerequisites
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- Node.js (version 18 or higher)
+- npm
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+4. Open [http://localhost:5173](http://localhost:5173) in your browser
+
+### Development Commands
+
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build locally
+- `npm run lint` - Run ESLint for code quality
+
+## Project Structure
+
+```
+src/
+├── components/
+│   ├── BookingPage.tsx      # Tennis court booking interface
+│   ├── ChatBot.tsx          # AI chatbot component
+│   ├── LoginPage.tsx        # User authentication
+│   └── ui/                  # Reusable UI components
+├── services/
+│   └── apiService.ts        # API communication layer
+├── shared/
+│   └── services/
+│       ├── authService.ts   # Authentication logic
+│       └── utils.ts         # Shared utilities
+└── lib/
+    └── utils.ts             # Utility functions
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## API Configuration
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+The application is configured to work with different API endpoints:
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- **Development**: Proxies `/api/*` requests to `http://localhost:8080/api/*`
+- **Production**: API calls go to `/api/*` on the same domain
+
+## Contributing
+
+This is a hackathon project. For development:
+
+1. Follow the existing code style and TypeScript practices
+2. Run `npm run lint` before committing
+3. Ensure all type checks pass with the build command
+
+## License
+
+This project was created for hackathon purposes.

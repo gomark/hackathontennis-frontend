@@ -127,7 +127,7 @@ export function ChatBot({ isOpen, onToggle, user }: ChatBotProps) {
     <div className="w-96 h-[65vh] bg-white rounded-2xl shadow-xl border overflow-hidden flex flex-col">
       <div className="bg-green-600 text-white p-4 flex justify-between items-center">
         <div>
-          <h3 className="font-semibold">Tennis Assistant Agent</h3>
+          <h3 className="font-semibold">Ace book Agent</h3>
           <p className="text-sm opacity-90">Online</p>
         </div>
         <div className="flex space-x-1">
